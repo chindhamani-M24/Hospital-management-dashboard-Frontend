@@ -1,0 +1,63 @@
+{
+  "name": "Hospital - Appointment booking webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "appointment-booking",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "c2263af4-1510-4af2-a1e7-b0b2fd12a001",
+      "name": "Appointment booking webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-680, 220],
+      "webhookId": "hospital-appointment-booking"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {"id":"1","name":"patientName","value":"={{ $json.body.patientName }}","type":"string"},
+            {"id":"2","name":"phone","value":"={{ $json.body.phone }}","type":"string"},
+            {"id":"3","name":"email","value":"={{ $json.body.email || '' }}","type":"string"},
+            {"id":"4","name":"doctor","value":"={{ $json.body.doctor }}","type":"string"},
+            {"id":"5","name":"date","value":"={{ $json.body.date }}","type":"string"},
+            {"id":"6","name":"time","value":"={{ $json.body.time }}","type":"string"},
+            {"id":"7","name":"location","value":"={{ $json.body.location }}","type":"string"},
+            {"id":"8","name":"appointmentId","value":"=APT-{{ $now.toFormat('yyyyLLdd-HHmmss') }}","type":"string"}
+          ]
+        },
+        "options": {}
+      },
+      "id": "c2263af4-1510-4af2-a1e7-b0b2fd12a002",
+      "name": "Normalise request",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-440, 220]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, appointmentId: $json.appointmentId, status: 'Pending', message: 'Request received. The hospital will confirm availability shortly.' } }}",
+        "options": {}
+      },
+      "id": "c2263af4-1510-4af2-a1e7-b0b2fd12a003",
+      "name": "Respond to dashboard",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [-180, 220]
+    }
+  ],
+  "connections": {
+    "Appointment booking webhook": {"main":[[{"node":"Normalise request","type":"main","index":0}]]},
+    "Normalise request": {"main":[[{"node":"Respond to dashboard","type":"main","index":0}]]}
+  },
+  "pinData": {},
+  "active": false,
+  "settings": {"executionOrder":"v1"},
+  "versionId": "c2263af4-1510-4af2-a1e7-b0b2fd120001",
+  "meta": {"templateCredsSetupCompleted": false},
+  "tags": []
+}
